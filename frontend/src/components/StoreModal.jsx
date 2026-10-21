@@ -16,7 +16,7 @@ function StoreModal({ store, onClose }) {
     >
       {/* Modal Box */}
       <div
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 flex flex-col gap-4"
+        className="flex max-h-[calc(100dvh-2rem)] w-full max-w-md flex-col gap-4 overflow-y-auto rounded-2xl bg-white p-5 shadow-2xl sm:p-6"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

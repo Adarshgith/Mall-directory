@@ -13,7 +13,8 @@ function CategoryFilter({ selected, onSelect }) {
         <button
           key={cat}
           onClick={() => onSelect(cat === "All" ? "" : cat)}
-          className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-all duration-200
+          aria-pressed={selected === (cat === "All" ? "" : cat)}
+          className={`min-h-10 rounded-full border px-3 py-2 text-sm font-medium transition-colors duration-200
             ${
               selected === (cat === "All" ? "" : cat)
                 ? "bg-blue-600 text-white border-blue-600"

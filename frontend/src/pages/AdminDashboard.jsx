@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { getStores, createStore, updateStore, deleteStore } from "../services/api";
+import SummaryCards from "../components/SummaryCards";
 
 const CATEGORIES = ["Food & Beverage", "Fashion", "Electronics", "Services"];
 
@@ -41,7 +42,7 @@ function StoreForm({ initial, onSubmit, onCancel, loading }) {
       onClick={onCancel}
     >
       <div
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 flex flex-col gap-4"
+        className="flex max-h-[calc(100dvh-2rem)] w-full max-w-md flex-col gap-4 overflow-y-auto rounded-2xl bg-white p-5 shadow-2xl sm:p-6"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-xl font-bold text-gray-900">
@@ -229,7 +230,7 @@ function AdminDashboard() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="mx-auto w-full max-w-6xl">
       {/* Toast */}
       {toast && (
         <div
@@ -241,7 +242,7 @@ function AdminDashboard() {
       )}
 
       {/* Header */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Admin Dashboard</h1>
           <p className="text-sm text-gray-500">
@@ -250,11 +251,13 @@ function AdminDashboard() {
         </div>
         <button
           onClick={() => setShowForm(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors"
+          className="w-full rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 sm:w-auto"
         >
           + Add Store
         </button>
       </div>
+
+      {!loading && <SummaryCards stores={stores} />}
 
       {/* Table */}
       {loading ? (

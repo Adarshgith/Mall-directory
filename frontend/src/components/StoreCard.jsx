@@ -7,9 +7,10 @@ function StoreCard({ store, onClick }) {
   };
 
   return (
-    <div
+    <button
+      type="button"
       onClick={() => onClick(store)}
-      className="bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 cursor-pointer p-5 flex flex-col gap-3 border border-gray-200 hover:border-blue-400"
+      className="flex min-h-64 w-full min-w-0 cursor-pointer flex-col items-start gap-3 rounded-xl border border-gray-200 bg-white p-5 text-left shadow-md transition-shadow duration-300 hover:border-blue-400 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
     >
       {/* Category Badge */}
       <span
@@ -21,19 +22,25 @@ function StoreCard({ store, onClick }) {
       </span>
 
       {/* Store Name */}
-      <h2 className="text-lg font-bold text-gray-900">{store.name}</h2>
+      <h2 className="w-full break-words text-lg font-bold text-gray-900">
+        {store.name}
+      </h2>
 
       {/* Floor */}
       <p className="text-sm text-gray-500">📍 {store.floor}</p>
 
       {/* Description */}
-      <p className="text-sm text-gray-600 line-clamp-2">{store.description}</p>
+      <p className="line-clamp-3 w-full break-words text-sm text-gray-600">
+        {store.description}
+      </p>
 
       {/* Opening Hours */}
       {store.openingHours && (
-        <p className="text-xs text-gray-400 mt-auto">🕐 {store.openingHours}</p>
+        <p className="mt-auto w-full break-words text-xs text-gray-500">
+          🕐 {store.openingHours}
+        </p>
       )}
-    </div>
+    </button>
   );
 }
 

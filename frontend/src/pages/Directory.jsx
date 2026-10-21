@@ -3,7 +3,9 @@ import SearchBar from "../components/SearchBar";
 import CategoryFilter from "../components/CategoryFilter";
 import StoreCard from "../components/StoreCard";
 import StoreModal from "../components/StoreModal";
+import SortDropdown from "../components/SortDropdown";
 import { getStores } from "../services/api";
+import Pagination from "../components/Pagination";
 
 function Directory() {
   const [stores, setStores] = useState([]);
@@ -12,6 +14,9 @@ function Directory() {
   const [selectedStore, setSelectedStore] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [sortOrder, setSortOrder] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const STORES_PER_PAGE = 6;
 
   useEffect(() => {
     const fetchStores = async () => {
@@ -20,7 +25,7 @@ function Directory() {
       try {
         const data = await getStores(search, category);
         setStores(data);
-      } catch (err) {
+      } catch {
         setError("Failed to load stores. Please try again.");
       } finally {
         setLoading(false);
@@ -32,20 +37,59 @@ function Directory() {
     return () => clearTimeout(timer);
   }, [search, category]);
 
+  const sortedStores = [...stores].sort((a, b) => {
+    if (sortOrder === "az") return a.name.localeCompare(b.name);
+    if (sortOrder === "za") return b.name.localeCompare(a.name);
+    return 0;
+  });
+
+  const totalPages = Math.ceil(sortedStores.length / STORES_PER_PAGE);
+
+  const paginatedStores = sortedStores.slice(
+    (currentPage - 1) * STORES_PER_PAGE,
+    currentPage * STORES_PER_PAGE,
+  );
+
+  const handleSearchChange = (value) => {
+    setCurrentPage(1);
+    setSearch(value);
+  };
+
+  const handleCategoryChange = (value) => {
+    setCurrentPage(1);
+    setCategory(value);
+  };
+
+  const handleSortChange = (value) => {
+    setCurrentPage(1);
+    setSortOrder(value);
+  };
+
+  const clearFilters = () => {
+    setCurrentPage(1);
+    setSearch("");
+    setCategory("");
+  };
+
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="mx-auto w-full max-w-7xl">
       {/* Page Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-800 mb-1">Store Directory</h1>
+      <div className="mb-6 sm:mb-8">
+        <h1 className="mb-1 text-2xl font-bold text-gray-800 sm:text-3xl">
+          Store Directory
+        </h1>
         <p className="text-sm text-gray-500">Browse all stores in the mall</p>
       </div>
 
       {/* Search + Filter */}
-      <div className="flex flex-col sm:flex-row gap-4 mb-6">
-        <div className="w-full sm:max-w-sm">
-          <SearchBar value={search} onChange={setSearch} />
+      <div className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-[minmax(16rem,0.8fr)_minmax(0,1.5fr)] lg:items-start">
+        <div className="flex min-w-0 flex-col gap-3 sm:flex-row lg:flex-col">
+          <SearchBar value={search} onChange={handleSearchChange} />
+          <SortDropdown value={sortOrder} onChange={handleSortChange} />
         </div>
-        <CategoryFilter selected={category} onSelect={setCategory} />
+        <div className="min-w-0">
+          <CategoryFilter selected={category} onSelect={handleCategoryChange} />
+        </div>
       </div>
 
       {/* Loading State */}
@@ -61,7 +105,9 @@ function Directory() {
           <span className="text-3xl">⚠️</span>
           <p className="text-red-500 font-medium">{error}</p>
           <button
-            onClick={() => setSearch("") || setCategory("")}
+            onClick={() => {
+              clearFilters();
+            }}
             className="text-sm text-blue-500 hover:underline mt-1"
           >
             Reset filters
@@ -78,7 +124,9 @@ function Directory() {
             Try a different search term or category
           </p>
           <button
-            onClick={() => { setSearch(""); setCategory(""); }}
+            onClick={() => {
+              clearFilters();
+            }}
             className="mt-2 px-4 py-1.5 text-sm bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors"
           >
             Clear filters
@@ -92,8 +140,8 @@ function Directory() {
           <p className="text-sm text-gray-400 mb-4">
             {stores.length} store{stores.length !== 1 ? "s" : ""} found
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-            {stores.map((store) => (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
+            {paginatedStores.map((store) => (
               <StoreCard
                 key={store._id}
                 store={store}
@@ -103,6 +151,12 @@ function Directory() {
           </div>
         </>
       )}
+
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+      />
 
       {/* Modal */}
       <StoreModal
