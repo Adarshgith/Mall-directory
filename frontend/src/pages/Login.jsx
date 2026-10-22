@@ -100,13 +100,9 @@ function Login() {
         </form>
 
         <div className="mt-6 rounded-lg bg-gray-50 px-4 py-3 text-center">
-          <p className="text-xs text-gray-500">
-            {import.meta.env.DEV ? "Local demo credentials" : "Staging access"}
-          </p>
+          <p className="text-xs text-gray-500">Demo reviewer credentials</p>
           <p className="mt-1 text-sm font-medium text-gray-700">
-            {import.meta.env.DEV
-              ? "admin@mall.com / admin123"
-              : "Contact the project owner for login credentials."}
+            admin@mall.com / admin123
           </p>
         </div>
       </div>

@@ -84,7 +84,7 @@ ADMIN_PASSWORD=admin123
 JWT_SECRET=replace-with-a-long-random-secret
 ```
 
-The example admin credentials (`admin@mall.com` / `admin123`) are for local development only. They are shown on the login page only while running the Vite development server. Set these same values in `backend/.env` to use the local demo login; the backend environment template is at `backend/.env.example`. Never use the demo password or example JWT secret in staging or production; configure private credentials in the hosting provider instead.
+The demo reviewer credentials (`admin@mall.com` / `admin123`) are displayed on the login page in local and staging builds. Set `ADMIN_EMAIL=admin@mall.com` and `ADMIN_PASSWORD=admin123` in the corresponding backend environment for these credentials to work. These public demo credentials grant admin access; use them only with disposable demo data, and change them after review. The backend environment template is at `backend/.env.example`.
 
 Email matching ignores letter case and surrounding spaces; passwords must match exactly.
 
