@@ -232,7 +232,7 @@ The staging login only accepts the values configured in that Render service's en
 
 The deployed frontend is [https://mall-directory.vercel.app](https://mall-directory.vercel.app).
 
-Configure `frontend` as the Vercel project root, use `npm run build` as the build command, and `dist` as the output directory. Set this environment variable in Vercel:
+Configure `frontend` as the Vercel project root, use `npm run build` as the build command, and `dist` as the output directory. The included `vercel.json` rewrites client-side routes such as `/login` and `/admin` to the app entry point, so refreshing those URLs does not return a Vercel 404. Set this environment variable in Vercel:
 
 ```env
 VITE_API_URL=https://mall-directory.onrender.com/api
