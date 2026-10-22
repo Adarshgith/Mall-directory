@@ -20,7 +20,7 @@ export const getStores = async (search = "", category = "") => {
     throw new Error("The stores API returned an invalid response");
   }
 
-  return data.data; // ✅ fixed
+  return data.data;
 };
 
 export const getStore = async (id) => {
@@ -30,7 +30,7 @@ export const getStore = async (id) => {
   }
 
   const data = await res.json();
-  return data.data; // ✅ fixed
+  return data.data;
 };
 
 export const createStore = async (storeData) => {
@@ -40,7 +40,7 @@ export const createStore = async (storeData) => {
     body: JSON.stringify(storeData),
   });
   const data = await res.json();
-  return data; // admin dashboard use karega success/message bhi
+  return data;
 };
 
 export const updateStore = async (id, storeData) => {
@@ -50,7 +50,7 @@ export const updateStore = async (id, storeData) => {
     body: JSON.stringify(storeData),
   });
   const data = await res.json();
-  return data; // admin dashboard use karega
+  return data;
 };
 
 export const deleteStore = async (id) => {
@@ -58,7 +58,7 @@ export const deleteStore = async (id) => {
     method: "DELETE",
   });
   const data = await res.json();
-  return data; // admin dashboard use karega
+  return data;
 };
 
 export const loginAdmin = async (email, password) => {
