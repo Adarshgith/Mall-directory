@@ -13,7 +13,11 @@ The backend root endpoint returns a simple status message. Store API routes are 
 
 - Store directory populated from the backend API
 - Debounced name search and category filters
+- Alphabetical sorting by store name (A–Z or Z–A)
+- Client-side pagination with six stores per page
 - Store detail modal with location, description, and opening hours
+- Admin dashboard summary with total stores, distinct categories, and the most populated category
+- Admin login and a frontend-protected `/admin` route
 - Admin dashboard with store table and add, edit, and delete actions
 - Required-field validation in the admin form and backend
 - Loading, empty, and error/feedback states
@@ -38,15 +42,24 @@ mall-directory/
 │   ├── middleware/validate.js   # Store request validation
 │   ├── models/Store.js          # Mongoose store model
 │   ├── routes/stores.js         # Store CRUD API
+│   ├── routes/auth.js           # Admin login API
 │   ├── seed/seedData.js         # Sample data seeder
 │   ├── tests/stores.test.js     # API tests
 │   └── server.js                # Express app and server
 └── frontend/
     └── src/
-        ├── components/          # Search, filters, cards, and modals
-        ├── pages/               # Directory and admin dashboard
+        ├── components/          # Search, filters, sorting, pagination, cards, and modals
+        ├── pages/               # Directory, login, and admin dashboard
         └── services/api.js      # Frontend API requests
 ```
+
+## Architecture and feature behavior
+
+- The React/Vite frontend calls the Express API using `VITE_API_URL`. Express connects to MongoDB through Mongoose and serves the store and authentication routes.
+- Store search and category filtering are sent to `GET /api/stores`. The API returns matching stores ordered newest first; the directory then sorts the returned results alphabetically in the browser and paginates them at six stores per page. Changing search, category, or sort resets the page to the first page.
+- The admin dashboard loads the store list and calculates the total store count, the number of distinct categories represented by those stores, and the most populated category.
+- Admin login compares credentials configured on the backend and returns a JWT that expires after 24 hours. The frontend stores the token in `localStorage`; the `/admin` route redirects to `/login` when no token is present.
+- **Authorization limitation:** the admin route check is frontend-only. Store create, update, and delete API endpoints currently do not verify the JWT, so this login does not secure those API operations. Do not rely on it as backend authorization for a production admin system.
 
 ## Run locally
 
@@ -61,17 +74,19 @@ cd backend
 Copy-Item .env.example .env
 ```
 
-Edit `backend/.env` and set `MONGODB_URI` to your MongoDB connection string. `PORT` is optional and defaults to `5000`.
+Edit `backend/.env` and set `MONGODB_URI` to a reachable MongoDB connection string. For a local MongoDB server, the example below uses the `mall-directory` database; MongoDB creates the database when the application first writes data. `PORT` is optional and defaults to `5000`.
 
 ```env
 MONGODB_URI=mongodb://127.0.0.1:27017/mall-directory
 PORT=5000
 ADMIN_EMAIL=admin@mall.com
-ADMIN_PASSWORD=replace-with-a-strong-password
+ADMIN_PASSWORD=admin123
 JWT_SECRET=replace-with-a-long-random-secret
 ```
 
-Set the admin credentials and a private JWT secret in `backend/.env`. The login form must use the same email/password values.
+The example admin credentials (`admin@mall.com` / `admin123`) are for local development only. They are shown on the login page only while running the Vite development server. Set these same values in `backend/.env` to use the local demo login; the backend environment template is at `backend/.env.example`. Never use the demo password or example JWT secret in staging or production; configure private credentials in the hosting provider instead.
+
+Email matching ignores letter case and surrounding spaces; passwords must match exactly.
 
 Install dependencies and start the API:
 
@@ -96,6 +111,8 @@ Set the API base URL in `frontend/.env`:
 ```env
 VITE_API_URL=http://localhost:5000/api
 ```
+
+The frontend environment template is at `frontend/.env.example`.
 
 Install dependencies and start Vite:
 
@@ -136,7 +153,7 @@ Example files are provided in `backend/.env.example` and `frontend/.env.example`
 
 Base URL: `https://mall-directory.onrender.com/api`
 
-All store endpoints return JSON. Successful store responses use `{ "success": true, "data": ... }`; validation errors return `{ "success": false, "errors": [...] }`.
+For local development, use `http://localhost:5000/api`. All endpoints return JSON. Successful store responses use `{ "success": true, "data": ... }`; validation errors return `{ "success": false, "errors": [...] }`.
 
 | Method | Endpoint | Description |
 | --- | --- | --- |
@@ -153,7 +170,7 @@ All store endpoints return JSON. Successful store responses use `{ "success": tr
 GET /api/stores?search=bean&category=Food%20%26%20Beverage
 ```
 
-Both query parameters are optional. Search matches store names without case sensitivity. Results are ordered newest first (`createdAt` descending).
+Both query parameters are optional. Search matches store names without case sensitivity. The API returns results newest first (`createdAt` descending). Alphabetical sorting and pagination are currently handled by the frontend; the API does not accept sort, page, or limit parameters.
 
 ### Store fields
 
@@ -209,6 +226,8 @@ When configuring the Render service, use `backend` as the root directory, `npm i
 
 For admin login, also configure `ADMIN_EMAIL`, `ADMIN_PASSWORD`, and `JWT_SECRET` in Render's environment settings. Use a strong password and a unique, private JWT secret; do not use the example placeholders.
 
+The staging login only accepts the values configured in that Render service's environment settings. Confirm `ADMIN_EMAIL` and `ADMIN_PASSWORD` there match the credentials you enter, and ensure `JWT_SECRET` is set. Changing these values requires restarting or redeploying the backend service.
+
 ### Frontend on Vercel
 
 The deployed frontend is [https://mall-directory.vercel.app](https://mall-directory.vercel.app).
@@ -223,7 +242,7 @@ Vite embeds `VITE_API_URL` at build time, so redeploy the frontend after changin
 
 ## Limitations and security notes
 
-- Admin login gates the `/admin` page in the frontend, but the backend store CRUD endpoints do not verify JWTs. Add backend authorization before relying on this login to protect store data.
-- Pagination and server-side sorting controls are not implemented.
+- The `/admin` page is gated by the presence of a token in browser `localStorage`, but the backend store CRUD endpoints do not verify JWTs. Add backend authorization before relying on this login to protect store data.
+- Directory pagination and alphabetical sorting are client-side, not server-side.
 - The sample-data seeder deletes all store documents before inserting its samples; see the warning above.
 - Deployment depends on the frontend's `VITE_API_URL` and backend environment variables being configured correctly in their hosting environments.

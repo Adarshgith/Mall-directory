@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { API_BASE_URL } from "../services/api";
+import { loginAdmin } from "../services/api";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -10,42 +10,26 @@ function Login() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+
+
+  /** @param {import("react").FormEvent<HTMLFormElement>} event */
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     setError("");
     setLoading(true);
 
     try {
-      const res = await fetch(`${API_BASE_URL}/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+      const { ok, data } = await loginAdmin(email, password);
 
-      const contentType = res.headers.get("content-type") || "";
-      if (!contentType.includes("application/json")) {
-        setError(
-          res.status === 404
-            ? "The deployed backend is missing the login endpoint. Redeploy the backend with the latest auth changes."
-            : `Login service returned an unexpected response (${res.status}). Check the API URL.`,
-        );
-        return;
-      }
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.error || `Login failed (${res.status})`);
+      if (!ok) {
+        setError(data.error || "Login failed");
         return;
       }
 
       localStorage.setItem("token", data.token);
       navigate("/admin");
-    } catch (requestError) {
-      console.error("Admin login request failed:", requestError);
-      setError(
-        "Unable to connect to the login service. Check the API URL and try again.",
-      );
+    } catch {
+      setError("Something went wrong. Try again.");
     } finally {
       setLoading(false);
     }
@@ -115,13 +99,14 @@ function Login() {
           </button>
         </form>
 
-        {/* Demo Credentials */}
-        <div className="mt-6 bg-gray-50 rounded-lg px-4 py-3 text-center">
-          <p className="text-xs text-gray-500">Demo credentials</p>
-          <p className="text-sm font-medium text-gray-700 mt-1">
-            admin@mall.com / admin123
-          </p>
-        </div>
+        {import.meta.env.DEV && (
+          <div className="mt-6 rounded-lg bg-gray-50 px-4 py-3 text-center">
+            <p className="text-xs text-gray-500">Local demo credentials</p>
+            <p className="mt-1 text-sm font-medium text-gray-700">
+              admin@mall.com / admin123
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

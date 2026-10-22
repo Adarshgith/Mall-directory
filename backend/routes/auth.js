@@ -6,15 +6,26 @@ const router = express.Router();
 // POST /api/auth/login
 router.post("/login", (req, res) => {
   const { email, password } = req.body;
+  const adminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  const jwtSecret = process.env.JWT_SECRET;
+
+  if (!adminEmail || !adminPassword || !jwtSecret) {
+    return res
+      .status(500)
+      .json({ error: "Admin login is not configured on this server" });
+  }
 
   if (
-    email !== process.env.ADMIN_EMAIL ||
-    password !== process.env.ADMIN_PASSWORD
+    typeof email !== "string" ||
+    email.trim().toLowerCase() !== adminEmail ||
+    typeof password !== "string" ||
+    password !== adminPassword
   ) {
     return res.status(401).json({ error: "Invalid email or password" });
   }
 
-  const token = jwt.sign({ email }, process.env.JWT_SECRET, {
+  const token = jwt.sign({ email: adminEmail }, jwtSecret, {
     expiresIn: "24h",
   });
 

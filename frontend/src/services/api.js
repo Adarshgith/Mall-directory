@@ -60,3 +60,13 @@ export const deleteStore = async (id) => {
   const data = await res.json();
   return data; // admin dashboard use karega
 };
+
+export const loginAdmin = async (email, password) => {
+  const res = await fetch(`${API_BASE_URL}/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+  const data = await res.json();
+  return { ok: res.ok, data };
+};
